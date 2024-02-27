@@ -47,6 +47,60 @@ DEFAULT_TEMP_DIR = os.environ.get("GRADIO_TEMP_DIR") or str(
     Path(tempfile.gettempdir()) / "gradio"
 )
 
+from .pyresourcepool import ResourcePool
+from contextlib import contextmanager
+class SessionAwarePooledClient:
+    def __init__(self, src:str, nsession:int, session_header_name:str="session_hash", **args):
+        self.src = src
+        self.args = args
+        self.nsession=nsession
+        self._pool = None
+        self.session_header_name = session_header_name
+        self._create_pool()
+    
+    def predict(
+        self,
+        *args,
+        api_name: str | None = None,
+        fn_index: int | None = None,
+    ) -> Any:
+        """
+        Calls the Gradio API and returns the result (this is a blocking call).
+
+        Parameters:
+            args: The arguments to pass to the remote API. The order of the arguments must match the order of the inputs in the Gradio app.
+            api_name: The name of the API endpoint to call starting with a leading slash, e.g. "/predict". Does not need to be provided if the Gradio app has only one named API endpoint.
+            fn_index: As an alternative to api_name, this parameter takes the index of the API endpoint to call, e.g. 0. Both api_name and fn_index can be provided, but if they conflict, api_name will take precedence.
+        Returns:
+            The result of the API call. Will be a Tuple if the API has multiple outputs.
+        Example:
+            from gradio_client import Client
+            client = Client(src="gradio/calculator")
+            client.predict(5, "add", 4, api_name="/predict")
+            >> 9.0
+        """
+        with self._get_session(block=True) as session:
+            return session.predict(*args, api_name=api_name, fn_index=fn_index)
+
+    def _create_pool(self):
+        clients = []
+        for i in range(0, self.nsession):
+            client = Client(self.src, **self.args)
+            client.update_remote_session_hash(self.session_header_name)
+            clients.append(client)
+        self._pool = ResourcePool(clients)
+
+    @contextmanager
+    def _get_session(self, block=True):
+        obj = None
+        try:
+            obj = self._pool.get_resource_unmanaged(block=block)
+            yield obj
+        finally:
+            if obj:
+                self._pool.return_resource(obj)
+    
+
 
 @document("predict", "submit", "view_api", "duplicate", "deploy_discord")
 class Client:
@@ -763,6 +817,39 @@ class Client:
                     "Gradio 2.x is not supported by this client. Please upgrade your Gradio app to Gradio 3.x or higher."
                 )
             return config
+
+    def update_remote_session_hash(self, session_header_name:str) -> dict:
+        try:
+            self.headers.pop(session_header_name)
+        except:
+            pass
+        r = httpx.get(
+            urllib.parse.urljoin(self.src, utils.CONFIG_URL),
+            headers=self.headers,
+            cookies=self.cookies,
+        )
+        if r.is_success:
+            self.headers.update({session_header_name: r.headers.get(session_header_name)})
+        elif r.status_code == 401:
+            raise ValueError(f"Could not load {self.src}. Please login.")
+        else:  # to support older versions of Gradio
+            r = httpx.get(self.src, headers=self.headers, cookies=self.cookies)
+            if not r.is_success:
+                raise ValueError(f"Could not fetch config for {self.src}")
+            # some basic regex to extract the config
+            result = re.search(r"window.gradio_config = (.*?);[\s]*</script>", r.text)
+            try:
+                config = json.loads(result.group(1))  # type: ignore
+            except AttributeError as ae:
+                raise ValueError(
+                    f"Could not get Gradio config from: {self.src}"
+                ) from ae
+            if "allow_flagging" in config:
+                raise ValueError(
+                    "Gradio 2.x is not supported by this client. Please upgrade your Gradio app to Gradio 3.x or higher."
+                )
+            return config
+
 
     def deploy_discord(
         self,
