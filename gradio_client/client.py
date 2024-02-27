@@ -85,9 +85,12 @@ class SessionAwarePooledClient:
     def _create_pool(self):
         clients = []
         for i in range(0, self.nsession):
-            client = Client(self.src, **self.args)
-            client.update_remote_session_hash(self.session_header_name)
-            clients.append(client)
+            try:
+                client = Client(self.src, **self.args)
+                client.update_remote_session_hash(self.session_header_name)
+                clients.append(client)
+            except Exception as ex:
+                print(ex, "ignoring the backend session")
         self._pool = ResourcePool(clients)
 
     @contextmanager
