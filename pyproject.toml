@@ -3,7 +3,7 @@ requires = ["hatchling", "hatch-requirements-txt", "hatch-fancy-pypi-readme>=22.
 build-backend = "hatchling.build"
 
 [project]
-name = "proxyful_gradio_client"
+name = "gradio_client"
 dynamic = ["version", "dependencies", "readme"]
 description = "Load Balancer Aware Python library for easily interacting with trained machine learning models"
 license = "Apache-2.0"
