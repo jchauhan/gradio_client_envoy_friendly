@@ -8,6 +8,7 @@ dynamic = ["version", "dependencies", "readme"]
 description = "Load Balancer Aware Python library for easily interacting with trained machine learning models"
 license = "Apache-2.0"
 requires-python = ">=3.8"
+version = "0.10.1.7"
 authors = [
   { name = "Jitendra Chauhan", email = "jitendra@safedep.io" },
   { name = "Abubakar Abid", email = "gradio-team@huggingface.co" },
@@ -38,9 +39,6 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/jchauhan/gradio_client_envoy_friendly"
 
-[tool.hatch.version]
-path = "gradio_client/package.json"
-pattern = ".*\"version\":\\s*\"(?P<version>[^\"]+)\""
 
 [tool.hatch.metadata.hooks.requirements_txt]
 filename = "requirements.txt"
