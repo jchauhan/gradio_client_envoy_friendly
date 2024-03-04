@@ -92,6 +92,8 @@ class SessionAwarePooledClient:
             except Exception as ex:
                 print(ex, "ignoring the backend session")
         self._pool = ResourcePool(clients)
+        if self._pool.active_size <=0:
+            raise Exception("Failed Initialization, No active resource added to the pool")
 
     @contextmanager
     def _get_session(self, block=True):
