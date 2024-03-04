@@ -95,6 +95,9 @@ class SessionAwarePooledClient:
         if self._pool.active_size <=0:
             raise Exception("Failed Initialization, No active resource added to the pool")
 
+    def get_pool_size(self) -> int:
+        return self._pool.active_size
+
     @contextmanager
     def _get_session(self, block=True):
         obj = None
