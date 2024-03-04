@@ -84,11 +84,15 @@ class SessionAwarePooledClient:
 
     def _create_pool(self):
         clients = []
+        unique_sessions = set()
         for i in range(0, self.nsession):
             try:
                 client = Client(self.src, **self.args)
                 client.update_remote_session_hash(self.session_header_name)
-                clients.append(client)
+                # do not add client with session to same backend server
+                if not client.get_session_header() in unique_sessions:
+                    unique_sessions.add(client.get_session_header())
+                    clients.append(client)
             except Exception as ex:
                 print(ex, "ignoring the backend session")
         self._pool = ResourcePool(clients)
@@ -156,6 +160,7 @@ class Client:
         """
         self.verbose = verbose
         self.hf_token = hf_token
+        self.session_header = None
         if serialize is not None:
             warnings.warn(
                 "The `serialize` parameter is deprecated and will be removed. Please use the equivalent `upload_files` parameter instead."
@@ -826,6 +831,9 @@ class Client:
                 )
             return config
 
+    def get_session_header(self):
+        return self.session_header
+
     def update_remote_session_hash(self, session_header_name:str) -> dict:
         try:
             self.headers.pop(session_header_name)
@@ -838,25 +846,9 @@ class Client:
         )
         if r.is_success:
             self.headers.update({session_header_name: r.headers.get(session_header_name)})
+            self.session_header = self.headers.get(session_header_name)
         elif r.status_code == 401:
             raise ValueError(f"Could not load {self.src}. Please login.")
-        else:  # to support older versions of Gradio
-            r = httpx.get(self.src, headers=self.headers, cookies=self.cookies)
-            if not r.is_success:
-                raise ValueError(f"Could not fetch config for {self.src}")
-            # some basic regex to extract the config
-            result = re.search(r"window.gradio_config = (.*?);[\s]*</script>", r.text)
-            try:
-                config = json.loads(result.group(1))  # type: ignore
-            except AttributeError as ae:
-                raise ValueError(
-                    f"Could not get Gradio config from: {self.src}"
-                ) from ae
-            if "allow_flagging" in config:
-                raise ValueError(
-                    "Gradio 2.x is not supported by this client. Please upgrade your Gradio app to Gradio 3.x or higher."
-                )
-            return config
 
 
     def deploy_discord(
