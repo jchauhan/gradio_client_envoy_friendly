@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gradio_client"
-dynamic = ["version", "dependencies", "readme"]
+dynamic = ["dependencies", "readme"]
 description = "Load Balancer Aware Python library for easily interacting with trained machine learning models"
 license = "Apache-2.0"
 requires-python = ">=3.8"
-version = "0.10.1.7"
+version = "0.10.1.8"
 authors = [
   { name = "Jitendra Chauhan", email = "jitendra@safedep.io" },
   { name = "Abubakar Abid", email = "gradio-team@huggingface.co" },
