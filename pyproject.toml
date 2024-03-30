@@ -11,7 +11,7 @@ fsspec = "*"
 httpx = ">=0.24.1"
 huggingface_hub = ">=0.19.3"
 packaging = "*"
-typing_extensions = "~4.0"
+typing_extensions = ">=4.0"
 websockets = ">=10.0,<12.0"
 PyResourcePool = "*"
 
