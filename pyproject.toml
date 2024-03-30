@@ -3,7 +3,7 @@ name = "gradio-client"
 version = "0.10.1.9"
 description = "Envoy Friendly Gradio client"
 authors = ["jchauhan <jitendra@detoxio.ai>"]
-readme = "Readme.md"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
