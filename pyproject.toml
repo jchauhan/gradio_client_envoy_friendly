@@ -1,69 +1,27 @@
+[tool.poetry]
+name = "gradio-client"
+version = "0.10.1.9"
+description = "Envoy Friendly Gradio client"
+authors = ["jchauhan <jitendra@detoxio.ai>"]
+readme = "Readme.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fsspec = "*"
+httpx = ">=0.24.1"
+huggingface_hub = ">=0.19.3"
+packaging = "*"
+typing_extensions = "~4.0"
+websockets = ">=10.0,<12.0"
+PyResourcePool = "*"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.2"
+
 [build-system]
-requires = ["hatchling", "hatch-requirements-txt", "hatch-fancy-pypi-readme>=22.5.0"]
-build-backend = "hatchling.build"
-
-[project]
-name = "gradio_client"
-dynamic = ["dependencies", "readme"]
-description = "Load Balancer Aware Python library for easily interacting with trained machine learning models"
-license = "Apache-2.0"
-requires-python = ">=3.8"
-version = "0.10.1.8"
-authors = [
-  { name = "Jitendra Chauhan", email = "jitendra@safedep.io" },
-  { name = "Abubakar Abid", email = "gradio-team@huggingface.co" },
-  { name = "Ali Abid", email = "gradio-team@huggingface.co" },
-  { name = "Ali Abdalla", email = "gradio-team@huggingface.co" },
-  { name = "Dawood Khan", email = "gradio-team@huggingface.co" },
-  { name = "Ahsen Khaliq", email = "gradio-team@huggingface.co" },
-  { name = "Pete Allen", email = "gradio-team@huggingface.co" },
-  { name = "Freddy Boulton", email = "gradio-team@huggingface.co" },
-]
-keywords = ["machine learning", "client", "API"]
-
-classifiers = [
-  'Development Status :: 4 - Beta',
-  'License :: OSI Approved :: Apache Software License',
-  'Operating System :: OS Independent',
-  'Programming Language :: Python :: 3',
-  'Programming Language :: Python :: 3 :: Only',
-  'Programming Language :: Python :: 3.8',
-  'Programming Language :: Python :: 3.9',
-  'Programming Language :: Python :: 3.10',
-  'Programming Language :: Python :: 3.11',
-  'Topic :: Scientific/Engineering',
-  'Topic :: Scientific/Engineering :: Artificial Intelligence',
-  'Topic :: Software Development :: User Interfaces',
-]
-
-[project.urls]
-Homepage = "https://github.com/jchauhan/gradio_client_envoy_friendly"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 
-[tool.hatch.metadata.hooks.requirements_txt]
-filename = "requirements.txt"
-
-[tool.hatch.metadata.hooks.fancy-pypi-readme]
-content-type = "text/markdown"
-fragments = [
-  { path = "README.md" },
-]
-
-[tool.hatch.build.targets.sdist]
-include = [
-  "/gradio_client",
-  "/README.md",
-  "/requirements.txt",
-]
-
-[tool.ruff]
-extend = "../../pyproject.toml"
-
-[tool.ruff.lint.isort]
-known-first-party = [
-  "gradio_client"
-]
-
-[tool.pytest.ini_options]
-GRADIO_ANALYTICS_ENABLED = "False"
-HF_HUB_DISABLE_TELEMETRY =  "1"
